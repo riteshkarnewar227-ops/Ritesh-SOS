@@ -1,8 +1,8 @@
 package com.example.ui.screens
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -16,7 +16,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -46,9 +45,9 @@ fun PoliceHomeScreen(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(Life360DarkBg)
+            .background(Life360LightBg)
             .verticalScroll(scrollState)
-            .padding(16.dp),
+            .padding(horizontal = 18.dp, vertical = 14.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
@@ -58,64 +57,56 @@ fun PoliceHomeScreen(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Column {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(42.dp)
+                        .clip(CircleShape)
+                        .background(Life360Indigo.copy(alpha = 0.12f))
+                        .border(1.5.dp, Life360Indigo, CircleShape),
+                    contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = Icons.Default.LocalPolice,
                         contentDescription = null,
-                        tint = Life360Amber,
-                        modifier = Modifier.size(22.dp)
+                        tint = Life360Indigo,
+                        modifier = Modifier.size(24.dp)
                     )
+                }
+                Column {
                     Text(
                         text = "POLICE EMERGENCY DISPATCH",
-                        color = Color.White,
+                        color = Life360TextPrimary,
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Black,
                         letterSpacing = 0.5.sp
                     )
-                }
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(4.dp)
-                ) {
-                    Surface(
-                        color = Life360Amber.copy(alpha = 0.2f),
-                        shape = RoundedCornerShape(6.dp)
-                    ) {
-                        Text(
-                            text = "COMMAND DESK",
-                            color = Life360Amber,
-                            fontSize = 9.sp,
-                            fontWeight = FontWeight.Bold,
-                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
-                        )
-                    }
                     Text(
-                        text = "• ${userProfile?.policeStationOrBadge?.ifBlank { "Nagpur Police Control Room" }}",
-                        color = Life360TextSecondary,
+                        text = userProfile?.policeStationOrBadge?.ifBlank { "Nagpur Police Control Room • 112" } ?: "Nagpur Police Control Room • 112",
+                        color = Life360Indigo,
                         fontSize = 11.sp,
-                        fontWeight = FontWeight.Medium
+                        fontWeight = FontWeight.SemiBold
                     )
                 }
             }
 
-            // Switch Mode Button
+            // Switch Mode Button (Protected)
             IconButton(
                 onClick = onOpenSwitchMode,
                 modifier = Modifier
-                    .size(40.dp)
+                    .size(38.dp)
                     .clip(CircleShape)
-                    .background(Life360DarkSurface)
-                    .border(1.dp, Life360DarkBorder, CircleShape)
+                    .background(Life360LightSurface)
+                    .border(1.dp, Life360LightBorder, CircleShape)
                     .testTag("switch_mode_button")
             ) {
                 Icon(
-                    imageVector = Icons.Default.ManageAccounts,
+                    imageVector = Icons.Default.SwapHoriz,
                     contentDescription = "Switch Mode",
-                    tint = Life360PurpleLight,
+                    tint = Life360PurpleDark,
                     modifier = Modifier.size(18.dp)
                 )
             }
@@ -125,14 +116,14 @@ fun PoliceHomeScreen(
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(18.dp))
-                .border(1.dp, Life360DarkBorder, RoundedCornerShape(18.dp)),
-            colors = CardDefaults.cardColors(containerColor = Life360DarkSurface)
+                .clip(RoundedCornerShape(16.dp))
+                .border(1.dp, Life360Green.copy(alpha = 0.3f), RoundedCornerShape(16.dp)),
+            colors = CardDefaults.cardColors(containerColor = Life360GreenBg)
         ) {
             Row(
                 modifier = Modifier.padding(14.dp),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 Box(
                     modifier = Modifier
@@ -149,7 +140,7 @@ fun PoliceHomeScreen(
                 }
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = "EMERGENCY 112 DISPATCH ACTIVE",
+                        text = "EMERGENCY 112 DISPATCH RADAR ACTIVE",
                         color = Life360Green,
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Black,
@@ -157,8 +148,8 @@ fun PoliceHomeScreen(
                     )
                     Text(
                         text = "Monitoring live citizen SOS broadcasts & GPS distress coordinates in real time.",
-                        color = Life360TextSecondary,
-                        fontSize = 10.sp
+                        color = Life360TextPrimary,
+                        fontSize = 11.sp
                     )
                 }
             }
@@ -175,7 +166,7 @@ fun PoliceHomeScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "LIVE CITIZEN SOS INCIDENT QUEUE:",
+                    text = "LIVE CITIZEN SOS QUEUE",
                     color = Life360TextMuted,
                     style = MaterialTheme.typography.labelSmall,
                     fontSize = 10.sp,
@@ -184,7 +175,8 @@ fun PoliceHomeScreen(
                 )
 
                 Surface(
-                    color = Life360Red.copy(alpha = 0.2f),
+                    color = Life360RedBg,
+                    border = BorderStroke(1.dp, Life360Red.copy(alpha = 0.3f)),
                     shape = RoundedCornerShape(10.dp)
                 ) {
                     Text(
@@ -197,7 +189,7 @@ fun PoliceHomeScreen(
                 }
             }
 
-            // Primary Active Incident Card (either top from history or live demo incident)
+            // Primary Active Incident Card
             val topIncident = sosHistory.firstOrNull()
             val incidentAddress = topIncident?.address?.ifBlank { currentLocation.address } ?: "Near Sitabuldi Square, Nagpur"
             val incidentLat = topIncident?.latitude ?: currentLocation.latitude
@@ -209,8 +201,8 @@ fun PoliceHomeScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(20.dp))
-                    .border(2.dp, Life360Red, RoundedCornerShape(20.dp)),
-                colors = CardDefaults.cardColors(containerColor = Color(0xFF240E14))
+                    .border(1.5.dp, Life360Red, RoundedCornerShape(20.dp)),
+                colors = CardDefaults.cardColors(containerColor = Life360LightSurface)
             ) {
                 Column(
                     modifier = Modifier.padding(16.dp),
@@ -241,7 +233,7 @@ fun PoliceHomeScreen(
                             }
                             Column {
                                 Text(
-                                    text = "URGENT DISTRESS SIGNAL",
+                                    text = "URGENT CITIZEN DISTRESS",
                                     color = Life360Red,
                                     fontSize = 11.sp,
                                     fontWeight = FontWeight.Black,
@@ -249,7 +241,7 @@ fun PoliceHomeScreen(
                                 )
                                 Text(
                                     text = "$incidentSender • SOS Mobile Alert",
-                                    color = Color.White,
+                                    color = Life360TextPrimary,
                                     fontSize = 13.sp,
                                     fontWeight = FontWeight.Bold
                                 )
@@ -257,9 +249,9 @@ fun PoliceHomeScreen(
                         }
 
                         Surface(
-                            color = Life360Red.copy(alpha = 0.2f),
+                            color = Life360RedBg,
                             shape = RoundedCornerShape(8.dp),
-                            border = androidx.compose.foundation.BorderStroke(1.dp, Life360Red)
+                            border = BorderStroke(1.dp, Life360Red.copy(alpha = 0.5f))
                         ) {
                             Text(
                                 text = "HIGH PRIORITY",
@@ -271,7 +263,7 @@ fun PoliceHomeScreen(
                         }
                     }
 
-                    Divider(color = Life360DarkBorder, thickness = 1.dp)
+                    HorizontalDivider(color = Life360LightBorder, thickness = 1.dp)
 
                     // Incident Location & Telemetry
                     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -287,7 +279,7 @@ fun PoliceHomeScreen(
                             )
                             Text(
                                 text = incidentAddress,
-                                color = Color.White,
+                                color = Life360TextPrimary,
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.Bold
                             )
@@ -339,7 +331,8 @@ fun PoliceHomeScreen(
                             Text(
                                 text = "Dispatch PCR",
                                 fontSize = 11.sp,
-                                fontWeight = FontWeight.Bold
+                                fontWeight = FontWeight.Bold,
+                                color = Color.White
                             )
                         }
 
@@ -348,8 +341,8 @@ fun PoliceHomeScreen(
                             onClick = {
                                 onOpenGoogleMaps(incidentLat, incidentLng, "SOS: $incidentSender")
                             },
-                            colors = ButtonDefaults.outlinedButtonColors(contentColor = Life360PurpleLight),
-                            border = androidx.compose.foundation.BorderStroke(1.dp, Life360PurpleLight),
+                            colors = ButtonDefaults.outlinedButtonColors(contentColor = Life360PurpleDark),
+                            border = BorderStroke(1.dp, Life360Purple),
                             shape = RoundedCornerShape(12.dp),
                             modifier = Modifier
                                 .weight(1f)
@@ -359,7 +352,7 @@ fun PoliceHomeScreen(
                             Icon(
                                 imageVector = Icons.Default.Map,
                                 contentDescription = null,
-                                tint = Life360PurpleLight,
+                                tint = Life360PurpleDark,
                                 modifier = Modifier.size(16.dp)
                             )
                             Spacer(modifier = Modifier.width(4.dp))
@@ -376,7 +369,7 @@ fun PoliceHomeScreen(
                                 onClick = { onPlayAudioRecording(topIncident.audioFilePath) },
                                 modifier = Modifier
                                     .size(40.dp)
-                                    .background(Life360Green.copy(alpha = 0.2f), RoundedCornerShape(12.dp))
+                                    .background(Life360GreenBg, RoundedCornerShape(12.dp))
                                     .border(1.dp, Life360Green, RoundedCornerShape(12.dp))
                             ) {
                                 Icon(
@@ -398,7 +391,7 @@ fun PoliceHomeScreen(
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Text(
-                text = "NAGPUR CITY POLICE STATIONS & PATROL POSTS:",
+                text = "NAGPUR CITY POLICE STATIONS & PATROL POSTS",
                 color = Life360TextMuted,
                 style = MaterialTheme.typography.labelSmall,
                 fontSize = 10.sp,
@@ -411,8 +404,8 @@ fun PoliceHomeScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(16.dp))
-                        .border(1.dp, Life360DarkBorder, RoundedCornerShape(16.dp)),
-                    colors = CardDefaults.cardColors(containerColor = Life360DarkSurface)
+                        .border(1.dp, Life360LightBorder, RoundedCornerShape(16.dp)),
+                    colors = CardDefaults.cardColors(containerColor = Life360LightSurface)
                 ) {
                     Row(
                         modifier = Modifier.padding(12.dp),
@@ -422,20 +415,20 @@ fun PoliceHomeScreen(
                         Box(
                             modifier = Modifier
                                 .size(34.dp)
-                                .background(Life360Amber.copy(alpha = 0.2f), CircleShape),
+                                .background(Life360Indigo.copy(alpha = 0.12f), CircleShape),
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(
                                 imageVector = Icons.Default.LocalPolice,
                                 contentDescription = null,
-                                tint = Life360Amber,
+                                tint = Life360Indigo,
                                 modifier = Modifier.size(18.dp)
                             )
                         }
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
                                 text = station.name,
-                                color = Color.White,
+                                color = Life360TextPrimary,
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.Bold
                             )
@@ -449,12 +442,12 @@ fun PoliceHomeScreen(
                         IconButton(
                             onClick = { onDialHelpline(station.phoneNumber) },
                             modifier = Modifier
-                                .size(36.dp)
-                                .background(Life360DarkSurfaceElevated, CircleShape)
+                                .size(32.dp)
+                                .background(Life360GreenBg, CircleShape)
                         ) {
                             Icon(
-                                imageVector = Icons.Default.Phone,
-                                contentDescription = "Call Station",
+                                imageVector = Icons.Default.Call,
+                                contentDescription = "Call",
                                 tint = Life360Green,
                                 modifier = Modifier.size(16.dp)
                             )
@@ -464,76 +457,6 @@ fun PoliceHomeScreen(
             }
         }
 
-        // Direct Helplines Row
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-            PoliceHelplineButton(
-                title = "112 Central",
-                phone = "112",
-                icon = Icons.Default.Emergency,
-                tint = Life360Red,
-                onClick = { onDialHelpline("112") },
-                modifier = Modifier.weight(1f)
-            )
-            PoliceHelplineButton(
-                title = "1091 Damini",
-                phone = "1091",
-                icon = Icons.Default.Security,
-                tint = Life360Amber,
-                onClick = { onDialHelpline("1091") },
-                modifier = Modifier.weight(1f)
-            )
-            PoliceHelplineButton(
-                title = "139 RPF Post",
-                phone = "139",
-                icon = Icons.Default.Train,
-                tint = Life360PurpleLight,
-                onClick = { onDialHelpline("139") },
-                modifier = Modifier.weight(1f)
-            )
-        }
-
         Spacer(modifier = Modifier.height(16.dp))
     }
 }
-
-@Composable
-private fun PoliceHelplineButton(
-    title: String,
-    phone: String,
-    icon: ImageVector,
-    tint: Color,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Surface(
-        color = Life360DarkSurface,
-        shape = RoundedCornerShape(14.dp),
-        border = androidx.compose.foundation.BorderStroke(1.dp, Life360DarkBorder),
-        modifier = modifier
-            .clip(RoundedCornerShape(14.dp))
-            .clickable { onClick() }
-    ) {
-        Row(
-            modifier = Modifier.padding(10.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(6.dp)
-        ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                tint = tint,
-                modifier = Modifier.size(16.dp)
-            )
-            Text(
-                text = title,
-                color = Color.White,
-                fontSize = 11.sp,
-                fontWeight = FontWeight.Bold
-            )
-        }
-    }
-}
-

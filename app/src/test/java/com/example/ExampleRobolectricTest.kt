@@ -42,4 +42,17 @@ class ExampleRobolectricTest {
         val url = loc.toGoogleMapsUrl()
         assertEquals("https://maps.google.com/?q=21.1458,79.0882", url)
     }
+
+    @Test
+    fun `user profile passkey default and role separation`() {
+        val profile = com.example.model.UserProfile(
+            name = "Aarav",
+            phoneNumber = "+919876543210",
+            role = com.example.model.UserRole.CHILD,
+            passkey = "1234",
+            pairingCode = "SUR-8492"
+        )
+        assertEquals("1234", profile.passkey)
+        assertEquals("Citizen / Child", profile.role.getBadgeTitle())
+    }
 }

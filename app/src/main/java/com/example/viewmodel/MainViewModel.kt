@@ -96,11 +96,13 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         name: String,
         phone: String,
         role: UserRole,
+        passkey: String = "1234",
         extraField: String = "",
         pairedPhone: String = ""
     ) {
         viewModelScope.launch {
             val generatedCode = "SUR-${(1000..9999).random()}"
+            val finalPasskey = if (passkey.isNotBlank()) passkey.trim() else "1234"
             val profile = when (role) {
                 UserRole.CHILD -> {
                     UserProfile(
@@ -110,6 +112,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                         pairingCode = generatedCode,
                         pairedPersonPhone = pairedPhone.trim(),
                         pairedPersonName = if (extraField.isNotBlank()) extraField.trim() else "Guardian",
+                        passkey = finalPasskey,
                         isRegistered = true
                     )
                 }
@@ -122,6 +125,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                         pairedWithCode = extraField.trim().uppercase(),
                         pairedPersonName = "Child / Family Member",
                         pairedPersonPhone = pairedPhone.trim(),
+                        passkey = finalPasskey,
                         isRegistered = true
                     )
                 }
@@ -132,6 +136,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                         role = role,
                         pairingCode = generatedCode,
                         policeStationOrBadge = if (extraField.isNotBlank()) extraField.trim() else "Nagpur Police Central",
+                        passkey = finalPasskey,
                         isRegistered = true
                     )
                 }
@@ -165,6 +170,16 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     pairedPersonName = childName.trim(),
                     pairedPersonPhone = childPhone.trim()
                 )
+                repository.saveProfile(updated)
+            }
+        }
+    }
+
+    fun updatePasskey(newPasskey: String) {
+        viewModelScope.launch {
+            val current = userProfile.value
+            if (current != null && newPasskey.isNotBlank()) {
+                val updated = current.copy(passkey = newPasskey.trim())
                 repository.saveProfile(updated)
             }
         }

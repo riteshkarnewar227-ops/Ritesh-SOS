@@ -32,6 +32,7 @@ data class UserProfile(
     val pairedPersonName: String = "",
     val pairedPersonPhone: String = "",
     val policeStationOrBadge: String = "",
+    val passkey: String = "1234",
     val isRegistered: Boolean = true,
     val createdAt: Long = System.currentTimeMillis()
 )

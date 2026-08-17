@@ -395,24 +395,46 @@ fun ChildHomeScreen(
                     }
                     Column {
                         Text(
-                            text = "FAMILY CIRCLE CODE",
+                            text = "FAMILY CIRCLE SAFETY CODE",
                             color = Life360TextMuted,
                             fontSize = 10.sp,
                             fontWeight = FontWeight.Bold,
                             letterSpacing = 0.5.sp
                         )
-                        Text(
-                            text = userProfile?.pairingCode ?: "SUR-8921",
-                            color = Life360PurpleDark,
-                            fontSize = 15.sp,
-                            fontWeight = FontWeight.Black,
-                            letterSpacing = 1.sp
-                        )
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            Text(
+                                text = userProfile?.pairingCode?.ifBlank { "SUR-8921" } ?: "SUR-8921",
+                                color = Life360PurpleDark,
+                                fontSize = 15.sp,
+                                fontWeight = FontWeight.Black,
+                                letterSpacing = 1.sp
+                            )
+                            Surface(
+                                shape = RoundedCornerShape(6.dp),
+                                color = Life360Green.copy(alpha = 0.15f)
+                            ) {
+                                Text(
+                                    text = "PIN: ${userProfile?.passkey?.ifBlank { "1234" } ?: "1234"}",
+                                    color = Life360Green,
+                                    fontSize = 10.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    modifier = Modifier.padding(horizontal = 5.dp, vertical = 2.dp)
+                                )
+                            }
+                        }
                     }
                 }
 
                 Button(
-                    onClick = { onSharePairingCodeWhatsApp(userProfile?.pairingCode ?: "SUR-8921") },
+                    onClick = {
+                        val code = userProfile?.pairingCode?.ifBlank { "SUR-8921" } ?: "SUR-8921"
+                        val pass = userProfile?.passkey?.ifBlank { "1234" } ?: "1234"
+                        val inviteText = "🚨 *SURAKSHA 360 CIRCLE INVITE*\nHi Guardian, connect to my live safety dashboard using:\n📌 *Safety Code:* $code\n🔑 *Passkey / PIN:* $pass\nOpen Suraksha 360 > Parent Mode > Link Member"
+                        onSharePairingCodeWhatsApp(inviteText)
+                    },
                     colors = ButtonDefaults.buttonColors(
                         containerColor = Life360Green,
                         contentColor = Color.White
@@ -427,7 +449,7 @@ fun ChildHomeScreen(
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
-                        text = "Share Code",
+                        text = "Share Invite",
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Bold
                     )

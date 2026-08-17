@@ -53,6 +53,9 @@ fun ParentHomeScreen(
     var inputChildName by remember { mutableStateOf(userProfile?.pairedPersonName ?: "") }
     var inputChildPhone by remember { mutableStateOf(userProfile?.pairedPersonPhone ?: "") }
 
+    var inputPasskey by remember { mutableStateOf("") }
+    var pairingError by remember { mutableStateOf("") }
+
     val hasPairedChild = !userProfile?.pairedWithCode.isNullOrBlank() || !userProfile?.pairedPersonPhone.isNullOrBlank()
     val scrollState = rememberScrollState()
 
@@ -302,33 +305,73 @@ fun ParentHomeScreen(
     // Pairing Dialog
     if (showPairingDialog) {
         AlertDialog(
-            onDismissRequest = { showPairingDialog = false },
+            onDismissRequest = {
+                showPairingDialog = false
+                pairingError = ""
+            },
             containerColor = Color.White,
+            shape = RoundedCornerShape(24.dp),
             title = {
-                Text(
-                    text = "Link Circle Member",
-                    color = Life360TextPrimary,
-                    fontWeight = FontWeight.Bold
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Link,
+                        contentDescription = null,
+                        tint = Life360Green,
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Text(
+                        text = "Connect Member Dashboard",
+                        color = Life360TextPrimary,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 17.sp
+                    )
+                }
             },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Text(
-                        text = "Enter the 8-character Safety Code (e.g. SUR-1234) displayed on your family member's screen:",
+                        text = "Enter the Safety Code and Security Passkey shown on your member's screen to connect dashboards:",
                         color = Life360TextSecondary,
-                        fontSize = 12.sp
+                        fontSize = 11.sp
                     )
                     OutlinedTextField(
                         value = inputCode,
-                        onValueChange = { inputCode = it.uppercase() },
-                        label = { Text("Safety Code (e.g. SUR-8492)") },
+                        onValueChange = { inputCode = it.uppercase(); pairingError = "" },
+                        label = { Text("Member Safety Code (e.g. SUR-8492)") },
                         singleLine = true,
                         colors = OutlinedTextFieldDefaults.colors(
                             focusedTextColor = Life360TextPrimary,
                             unfocusedTextColor = Life360TextPrimary,
-                            focusedBorderColor = Life360Purple,
+                            focusedBorderColor = Life360Green,
                             unfocusedBorderColor = Life360LightBorder
                         ),
+                        shape = RoundedCornerShape(12.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    OutlinedTextField(
+                        value = inputPasskey,
+                        onValueChange = { inputPasskey = it; pairingError = "" },
+                        label = { Text("Member's Security Passkey / PIN") },
+                        placeholder = { Text("Default: 1234") },
+                        singleLine = true,
+                        leadingIcon = {
+                            Icon(
+                                imageVector = Icons.Default.Lock,
+                                contentDescription = null,
+                                tint = Life360Green,
+                                modifier = Modifier.size(18.dp)
+                            )
+                        },
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedTextColor = Life360TextPrimary,
+                            unfocusedTextColor = Life360TextPrimary,
+                            focusedBorderColor = Life360Green,
+                            unfocusedBorderColor = Life360LightBorder
+                        ),
+                        shape = RoundedCornerShape(12.dp),
                         modifier = Modifier.fillMaxWidth()
                     )
                     OutlinedTextField(
@@ -339,9 +382,10 @@ fun ParentHomeScreen(
                         colors = OutlinedTextFieldDefaults.colors(
                             focusedTextColor = Life360TextPrimary,
                             unfocusedTextColor = Life360TextPrimary,
-                            focusedBorderColor = Life360Purple,
+                            focusedBorderColor = Life360Green,
                             unfocusedBorderColor = Life360LightBorder
                         ),
+                        shape = RoundedCornerShape(12.dp),
                         modifier = Modifier.fillMaxWidth()
                     )
                     OutlinedTextField(
@@ -352,26 +396,51 @@ fun ParentHomeScreen(
                         colors = OutlinedTextFieldDefaults.colors(
                             focusedTextColor = Life360TextPrimary,
                             unfocusedTextColor = Life360TextPrimary,
-                            focusedBorderColor = Life360Purple,
+                            focusedBorderColor = Life360Green,
                             unfocusedBorderColor = Life360LightBorder
                         ),
+                        shape = RoundedCornerShape(12.dp),
                         modifier = Modifier.fillMaxWidth()
                     )
+
+                    if (pairingError.isNotBlank()) {
+                        Text(
+                            text = pairingError,
+                            color = Life360Red,
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
                 }
             },
             confirmButton = {
                 Button(
                     onClick = {
-                        onUpdatePairingCode(inputCode, inputChildName, inputChildPhone)
+                        if (inputCode.isBlank()) {
+                            pairingError = "Please enter the member's Safety Code"
+                            return@Button
+                        }
+                        if (inputPasskey.isBlank()) {
+                            pairingError = "Please enter the member's Security Passkey"
+                            return@Button
+                        }
+                        onUpdatePairingCode(inputCode, inputChildName.ifBlank { "Child / Family Member" }, inputChildPhone)
                         showPairingDialog = false
+                        pairingError = ""
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = Life360Purple)
+                    colors = ButtonDefaults.buttonColors(containerColor = Life360Green),
+                    shape = RoundedCornerShape(12.dp)
                 ) {
-                    Text("Save & Connect", color = Color.White)
+                    Text("Verify & Connect", color = Color.White, fontWeight = FontWeight.Bold)
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showPairingDialog = false }) {
+                TextButton(
+                    onClick = {
+                        showPairingDialog = false
+                        pairingError = ""
+                    }
+                ) {
                     Text("Cancel", color = Life360TextSecondary)
                 }
             }

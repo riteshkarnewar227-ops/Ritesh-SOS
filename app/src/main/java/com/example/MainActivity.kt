@@ -113,8 +113,8 @@ fun MainApp(viewModel: MainViewModel) {
     // If user is not yet registered, show the SignUp / Mode Selection screen
     if (userProfile == null || userProfile?.isRegistered != true) {
         SignUpScreen(
-            onCompleteSignUp = { name, phone, role, extraField, pairedPhone ->
-                viewModel.completeSignUp(name, phone, role, extraField, pairedPhone)
+            onCompleteSignUp = { name, phone, role, passkey, extraField, pairedPhone ->
+                viewModel.completeSignUp(name, phone, role, passkey, extraField, pairedPhone)
             }
         )
         return

@@ -1,6 +1,7 @@
 package com.example.ui.screens
 
-import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.*
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -17,11 +18,15 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.model.UserRole
@@ -29,7 +34,7 @@ import com.example.ui.theme.*
 
 @Composable
 fun SignUpScreen(
-    onCompleteSignUp: (name: String, phone: String, role: UserRole, extraField: String, pairedPhone: String) -> Unit,
+    onCompleteSignUp: (name: String, phone: String, role: UserRole, passkey: String, extraField: String, pairedPhone: String) -> Unit,
     initialRole: UserRole = UserRole.CHILD,
     isSwitchingMode: Boolean = false,
     onCancelSwitch: (() -> Unit)? = null
@@ -37,6 +42,8 @@ fun SignUpScreen(
     var selectedRole by remember { mutableStateOf(initialRole) }
     var name by remember { mutableStateOf("") }
     var phoneNumber by remember { mutableStateOf("") }
+    var passkey by remember { mutableStateOf("1234") }
+    var isPasskeyVisible by remember { mutableStateOf(false) }
     var extraField by remember { mutableStateOf("") }
     var pairedPhone by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf("") }
@@ -46,32 +53,30 @@ fun SignUpScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Life360DarkBg)
+            .background(Life360LightBg)
             .verticalScroll(scrollState)
-            .padding(20.dp),
+            .padding(horizontal = 20.dp, vertical = 24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(18.dp)
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        Spacer(modifier = Modifier.height(12.dp))
-
-        // Header Title
+        // App Header Brand
         Box(
             modifier = Modifier
-                .size(68.dp)
+                .size(64.dp)
+                .clip(CircleShape)
                 .background(
                     when (selectedRole) {
-                        UserRole.CHILD -> Life360Purple.copy(alpha = 0.2f)
-                        UserRole.PARENT -> Life360Green.copy(alpha = 0.2f)
-                        UserRole.POLICE -> Life360Blue.copy(alpha = 0.2f)
-                    },
-                    CircleShape
+                        UserRole.CHILD -> Life360PurpleBg
+                        UserRole.PARENT -> Life360GreenBg
+                        UserRole.POLICE -> Life360Indigo.copy(alpha = 0.12f)
+                    }
                 )
                 .border(
                     2.dp,
                     when (selectedRole) {
                         UserRole.CHILD -> Life360Purple
                         UserRole.PARENT -> Life360Green
-                        UserRole.POLICE -> Life360Blue
+                        UserRole.POLICE -> Life360Indigo
                     },
                     CircleShape
                 ),
@@ -79,97 +84,99 @@ fun SignUpScreen(
         ) {
             Icon(
                 imageVector = when (selectedRole) {
-                    UserRole.CHILD -> Icons.Default.Groups
+                    UserRole.CHILD -> Icons.Default.PersonPinCircle
                     UserRole.PARENT -> Icons.Default.FamilyRestroom
                     UserRole.POLICE -> Icons.Default.LocalPolice
                 },
                 contentDescription = null,
                 tint = when (selectedRole) {
-                    UserRole.CHILD -> Life360PurpleLight
+                    UserRole.CHILD -> Life360PurpleDark
                     UserRole.PARENT -> Life360Green
-                    UserRole.POLICE -> Life360Blue
+                    UserRole.POLICE -> Life360Indigo
                 },
-                modifier = Modifier.size(36.dp)
+                modifier = Modifier.size(32.dp)
             )
         }
 
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(
-                text = if (isSwitchingMode) "SWITCH CIRCLE ROLE" else "NAGPUR SURAKSHA 360",
-                color = Color.White,
-                fontSize = 22.sp,
+                text = if (isSwitchingMode) "SWITCH DASHBOARD MODE" else "SURAKSHA 360",
+                color = Life360TextPrimary,
+                fontSize = 20.sp,
                 fontWeight = FontWeight.Black,
                 letterSpacing = 1.sp
             )
             Text(
-                text = if (isSwitchingMode) "Select your role to switch circle view" else "Family Safety Circle & Automated Emergency Dispatch",
+                text = if (isSwitchingMode) "Enter Passkey to authenticate mode switch" else "Secure Family Protection & Emergency Dispatch",
                 color = Life360TextSecondary,
-                fontSize = 12.sp
+                fontSize = 12.sp,
+                textAlign = TextAlign.Center
             )
         }
 
-        // 3 Role Selection Cards
+        // Step 1: Select Dedicated Role Mode
         Text(
-            text = "STEP 1: SELECT YOUR ACCOUNT MODE",
-            color = Life360TextSecondary,
+            text = "STEP 1: SELECT YOUR DEDICATED MODE",
+            color = Life360TextMuted,
             fontSize = 10.sp,
             fontWeight = FontWeight.Bold,
-            letterSpacing = 1.sp,
+            letterSpacing = 0.5.sp,
             modifier = Modifier.align(Alignment.Start)
         )
 
         Column(
             modifier = Modifier.fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            RoleOptionCard(
+            RoleOptionTile(
                 title = "Member / Child Mode",
-                subtitle = "For students, commuters & citizens needing 1-tap SOS, live GPS sharing, and family code pairing.",
+                subtitle = "Single-purpose SOS screen, safe routes, live GPS, distress audio & family pairing code.",
                 icon = Icons.Default.PersonPinCircle,
-                badgeColor = Life360Purple,
+                accentColor = Life360Purple,
                 isSelected = selectedRole == UserRole.CHILD,
                 onClick = { selectedRole = UserRole.CHILD }
             )
 
-            RoleOptionCard(
+            RoleOptionTile(
                 title = "Parent / Guardian Mode",
-                subtitle = "For parents & guardians to pair with members, track live GPS & battery telemetry, and receive urgent WhatsApp SOS.",
+                subtitle = "Dedicated guardian dashboard with live member battery, location tracking & safe places.",
                 icon = Icons.Default.FamilyRestroom,
-                badgeColor = Life360Green,
+                accentColor = Life360Green,
                 isSelected = selectedRole == UserRole.PARENT,
                 onClick = { selectedRole = UserRole.PARENT }
             )
 
-            RoleOptionCard(
+            RoleOptionTile(
                 title = "Police Command Mode",
-                subtitle = "For Nagpur Police officers to monitor active citizen distress signals, live GPS radar, and audio evidence.",
+                subtitle = "Official Nagpur Police incident radar, citizen dispatch & emergency audio log verification.",
                 icon = Icons.Default.LocalPolice,
-                badgeColor = Life360Blue,
+                accentColor = Life360Indigo,
                 isSelected = selectedRole == UserRole.POLICE,
                 onClick = { selectedRole = UserRole.POLICE }
             )
         }
 
-        // Step 2: Information Inputs
+        // Step 2: Information & Passkey
         Text(
-            text = "STEP 2: ENTER YOUR DETAILS",
-            color = Life360TextSecondary,
+            text = "STEP 2: DETAILS & SECURITY PASSKEY",
+            color = Life360TextMuted,
             fontSize = 10.sp,
             fontWeight = FontWeight.Bold,
-            letterSpacing = 1.sp,
+            letterSpacing = 0.5.sp,
             modifier = Modifier.align(Alignment.Start)
         )
 
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(16.dp))
-                .border(1.dp, Life360DarkBorder, RoundedCornerShape(16.dp)),
-            colors = CardDefaults.cardColors(containerColor = Life360DarkSurface)
+                .clip(RoundedCornerShape(20.dp))
+                .border(1.dp, Life360LightBorder, RoundedCornerShape(20.dp))
+                .shadow(2.dp, RoundedCornerShape(20.dp), ambientColor = Life360PurpleBg),
+            colors = CardDefaults.cardColors(containerColor = Life360LightSurface)
         ) {
             Column(
                 modifier = Modifier.padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(14.dp)
+                verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 // Name Field
                 OutlinedTextField(
@@ -178,8 +185,8 @@ fun SignUpScreen(
                     label = {
                         Text(
                             when (selectedRole) {
-                                UserRole.CHILD -> "Your Name / Member Name"
-                                UserRole.PARENT -> "Parent / Guardian Name"
+                                UserRole.CHILD -> "Your Name (e.g. Priya Sharma)"
+                                UserRole.PARENT -> "Guardian Name (e.g. Rajesh Sharma)"
                                 UserRole.POLICE -> "Officer Name / Rank"
                             }
                         )
@@ -188,16 +195,19 @@ fun SignUpScreen(
                         Icon(
                             imageVector = Icons.Default.Person,
                             contentDescription = null,
-                            tint = Life360PurpleLight
+                            tint = Life360Purple
                         )
                     },
                     singleLine = true,
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = Life360Purple,
-                        unfocusedBorderColor = Life360DarkBorder,
-                        focusedTextColor = Color.White,
-                        unfocusedTextColor = Color.White
+                        unfocusedBorderColor = Life360LightBorder,
+                        focusedTextColor = Life360TextPrimary,
+                        unfocusedTextColor = Life360TextPrimary,
+                        focusedContainerColor = Life360LightSurfaceElevated,
+                        unfocusedContainerColor = Life360LightSurfaceElevated
                     ),
+                    shape = RoundedCornerShape(12.dp),
                     modifier = Modifier
                         .fillMaxWidth()
                         .testTag("signup_name_input")
@@ -208,33 +218,108 @@ fun SignUpScreen(
                     value = phoneNumber,
                     onValueChange = { phoneNumber = it; errorMessage = "" },
                     label = { Text("Your Mobile Number (WhatsApp)") },
+                    placeholder = { Text("+91 9876543210") },
                     leadingIcon = {
                         Icon(
                             imageVector = Icons.Default.Phone,
                             contentDescription = null,
-                            tint = Life360PurpleLight
+                            tint = Life360Purple
                         )
                     },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
                     singleLine = true,
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = Life360Purple,
-                        unfocusedBorderColor = Life360DarkBorder,
-                        focusedTextColor = Color.White,
-                        unfocusedTextColor = Color.White
+                        unfocusedBorderColor = Life360LightBorder,
+                        focusedTextColor = Life360TextPrimary,
+                        unfocusedTextColor = Life360TextPrimary,
+                        focusedContainerColor = Life360LightSurfaceElevated,
+                        unfocusedContainerColor = Life360LightSurfaceElevated
                     ),
+                    shape = RoundedCornerShape(12.dp),
                     modifier = Modifier
                         .fillMaxWidth()
                         .testTag("signup_phone_input")
                 )
 
-                // Role specific input
+                // Security Passkey / PIN Field
+                OutlinedTextField(
+                    value = passkey,
+                    onValueChange = {
+                        if (it.length <= 8) {
+                            passkey = it
+                            errorMessage = ""
+                        }
+                    },
+                    label = { Text("Security Passkey / PIN (4-6 digits)") },
+                    placeholder = { Text("1234") },
+                    leadingIcon = {
+                        Icon(
+                            imageVector = Icons.Default.Lock,
+                            contentDescription = null,
+                            tint = Life360Purple
+                        )
+                    },
+                    trailingIcon = {
+                        IconButton(onClick = { isPasskeyVisible = !isPasskeyVisible }) {
+                            Icon(
+                                imageVector = if (isPasskeyVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
+                                contentDescription = "Toggle Visibility",
+                                tint = Life360TextSecondary
+                            )
+                        }
+                    },
+                    visualTransformation = if (isPasskeyVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
+                    singleLine = true,
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = Life360Purple,
+                        unfocusedBorderColor = Life360LightBorder,
+                        focusedTextColor = Life360TextPrimary,
+                        unfocusedTextColor = Life360TextPrimary,
+                        focusedContainerColor = Life360LightSurfaceElevated,
+                        unfocusedContainerColor = Life360LightSurfaceElevated
+                    ),
+                    shape = RoundedCornerShape(12.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag("signup_passkey_input")
+                )
+
+                // Security Passkey Helper Note
+                Surface(
+                    shape = RoundedCornerShape(8.dp),
+                    color = Life360PurpleBg,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Security,
+                            contentDescription = null,
+                            tint = Life360PurpleDark,
+                            modifier = Modifier.size(14.dp)
+                        )
+                        Text(
+                            text = "Dashboards connect only via this Passkey. Default: 1234",
+                            color = Life360PurpleDark,
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
+                }
+
+                // Role-specific fields
                 when (selectedRole) {
                     UserRole.CHILD -> {
                         OutlinedTextField(
                             value = pairedPhone,
                             onValueChange = { pairedPhone = it },
                             label = { Text("Parent's Mobile Number (Optional)") },
+                            placeholder = { Text("e.g. 9876543210") },
                             leadingIcon = {
                                 Icon(
                                     imageVector = Icons.Default.ContactPhone,
@@ -242,15 +327,17 @@ fun SignUpScreen(
                                     tint = Life360Green
                                 )
                             },
-                            placeholder = { Text("e.g. 9876543210") },
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
                             singleLine = true,
                             colors = OutlinedTextFieldDefaults.colors(
                                 focusedBorderColor = Life360Green,
-                                unfocusedBorderColor = Life360DarkBorder,
-                                focusedTextColor = Color.White,
-                                unfocusedTextColor = Color.White
+                                unfocusedBorderColor = Life360LightBorder,
+                                focusedTextColor = Life360TextPrimary,
+                                unfocusedTextColor = Life360TextPrimary,
+                                focusedContainerColor = Life360LightSurfaceElevated,
+                                unfocusedContainerColor = Life360LightSurfaceElevated
                             ),
+                            shape = RoundedCornerShape(12.dp),
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .testTag("signup_parent_phone_input")
@@ -260,23 +347,26 @@ fun SignUpScreen(
                     UserRole.PARENT -> {
                         OutlinedTextField(
                             value = extraField,
-                            onValueChange = { extraField = it },
-                            label = { Text("Member's Pairing Code (Optional, e.g. SUR-1234)") },
+                            onValueChange = { extraField = it.uppercase() },
+                            label = { Text("Member's Code (Optional, e.g. SUR-1234)") },
+                            placeholder = { Text("Enter code shown on member screen") },
                             leadingIcon = {
                                 Icon(
                                     imageVector = Icons.Default.QrCode,
                                     contentDescription = null,
-                                    tint = Life360PurpleLight
+                                    tint = Life360Green
                                 )
                             },
-                            placeholder = { Text("e.g. SUR-8492 (or connect later)") },
                             singleLine = true,
                             colors = OutlinedTextFieldDefaults.colors(
-                                focusedBorderColor = Life360Purple,
-                                unfocusedBorderColor = Life360DarkBorder,
-                                focusedTextColor = Color.White,
-                                unfocusedTextColor = Color.White
+                                focusedBorderColor = Life360Green,
+                                unfocusedBorderColor = Life360LightBorder,
+                                focusedTextColor = Life360TextPrimary,
+                                unfocusedTextColor = Life360TextPrimary,
+                                focusedContainerColor = Life360LightSurfaceElevated,
+                                unfocusedContainerColor = Life360LightSurfaceElevated
                             ),
+                            shape = RoundedCornerShape(12.dp),
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .testTag("signup_child_code_input")
@@ -288,21 +378,24 @@ fun SignUpScreen(
                             value = extraField,
                             onValueChange = { extraField = it },
                             label = { Text("Police Station / Badge ID") },
+                            placeholder = { Text("e.g. Sitabuldi Station / Badge #402") },
                             leadingIcon = {
                                 Icon(
                                     imageVector = Icons.Default.Badge,
                                     contentDescription = null,
-                                    tint = Life360Blue
+                                    tint = Life360Indigo
                                 )
                             },
-                            placeholder = { Text("e.g. Sitabuldi Police Station / Badge #402") },
                             singleLine = true,
                             colors = OutlinedTextFieldDefaults.colors(
-                                focusedBorderColor = Life360Blue,
-                                unfocusedBorderColor = Life360DarkBorder,
-                                focusedTextColor = Color.White,
-                                unfocusedTextColor = Color.White
+                                focusedBorderColor = Life360Indigo,
+                                unfocusedBorderColor = Life360LightBorder,
+                                focusedTextColor = Life360TextPrimary,
+                                unfocusedTextColor = Life360TextPrimary,
+                                focusedContainerColor = Life360LightSurfaceElevated,
+                                unfocusedContainerColor = Life360LightSurfaceElevated
                             ),
+                            shape = RoundedCornerShape(12.dp),
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .testTag("signup_police_station_input")
@@ -314,8 +407,10 @@ fun SignUpScreen(
                     Text(
                         text = errorMessage,
                         color = Life360Red,
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Bold
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth()
                     )
                 }
             }
@@ -332,10 +427,15 @@ fun SignUpScreen(
                     errorMessage = "Please enter a valid phone number"
                     return@Button
                 }
+                if (passkey.isBlank() || passkey.length < 4) {
+                    errorMessage = "Please set a security passkey of at least 4 digits"
+                    return@Button
+                }
                 onCompleteSignUp(
                     name.trim(),
                     phoneNumber.trim(),
                     selectedRole,
+                    passkey.trim(),
                     extraField.trim(),
                     pairedPhone.trim()
                 )
@@ -344,26 +444,26 @@ fun SignUpScreen(
                 containerColor = when (selectedRole) {
                     UserRole.CHILD -> Life360Purple
                     UserRole.PARENT -> Life360Green
-                    UserRole.POLICE -> Life360Blue
+                    UserRole.POLICE -> Life360Indigo
                 }
             ),
             shape = RoundedCornerShape(14.dp),
             modifier = Modifier
                 .fillMaxWidth()
-                .height(52.dp)
+                .height(50.dp)
                 .testTag("complete_signup_button")
         ) {
             Icon(
                 imageVector = Icons.Default.CheckCircle,
                 contentDescription = null,
                 tint = Color.White,
-                modifier = Modifier.size(20.dp)
+                modifier = Modifier.size(18.dp)
             )
-            Spacer(modifier = Modifier.width(8.dp))
+            Spacer(modifier = Modifier.width(6.dp))
             Text(
-                text = if (isSwitchingMode) "Switch to ${selectedRole.getBadgeTitle()} Mode" else "Complete Sign Up & Launch App",
+                text = if (isSwitchingMode) "Authorize & Launch Dashboard" else "Launch Dedicated ${selectedRole.getBadgeTitle()} Dashboard",
                 color = Color.White,
-                fontSize = 15.sp,
+                fontSize = 14.sp,
                 fontWeight = FontWeight.Bold
             )
         }
@@ -373,7 +473,7 @@ fun SignUpScreen(
                 onClick = onCancelSwitch,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Cancel & Return to Dashboard", color = Life360TextSecondary)
+                Text("Cancel & Return", color = Life360TextSecondary, fontSize = 12.sp)
             }
         }
 
@@ -382,60 +482,58 @@ fun SignUpScreen(
 }
 
 @Composable
-private fun RoleOptionCard(
+private fun RoleOptionTile(
     title: String,
     subtitle: String,
     icon: ImageVector,
-    badgeColor: Color,
+    accentColor: Color,
     isSelected: Boolean,
     onClick: () -> Unit
 ) {
-    Card(
+    Surface(
+        shape = RoundedCornerShape(16.dp),
+        color = if (isSelected) accentColor.copy(alpha = 0.08f) else Life360LightSurface,
+        border = BorderStroke(
+            if (isSelected) 2.dp else 1.dp,
+            if (isSelected) accentColor else Life360LightBorder
+        ),
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
-            .border(
-                2.dp,
-                if (isSelected) badgeColor else Life360DarkBorder,
-                RoundedCornerShape(16.dp)
-            )
             .clickable { onClick() }
-            .testTag("role_option_${title.replace(" ", "_").lowercase()}"),
-        colors = CardDefaults.cardColors(
-            containerColor = if (isSelected) Life360DarkSurfaceElevated else Life360DarkSurface
-        )
+            .testTag("role_option_${title.replace(" ", "_").lowercase()}")
     ) {
         Row(
-            modifier = Modifier.padding(14.dp),
+            modifier = Modifier.padding(12.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             Box(
                 modifier = Modifier
-                    .size(44.dp)
-                    .background(badgeColor.copy(alpha = 0.25f), CircleShape),
+                    .size(38.dp)
+                    .clip(CircleShape)
+                    .background(accentColor.copy(alpha = 0.15f)),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = icon,
                     contentDescription = null,
-                    tint = badgeColor,
-                    modifier = Modifier.size(24.dp)
+                    tint = accentColor,
+                    modifier = Modifier.size(20.dp)
                 )
             }
 
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = title,
-                    color = Color.White,
-                    fontSize = 14.sp,
+                    color = Life360TextPrimary,
+                    fontSize = 13.sp,
                     fontWeight = FontWeight.Bold
                 )
                 Text(
                     text = subtitle,
                     color = Life360TextSecondary,
-                    fontSize = 11.sp,
-                    lineHeight = 15.sp
+                    fontSize = 10.sp,
+                    lineHeight = 13.sp
                 )
             }
 
@@ -443,11 +541,10 @@ private fun RoleOptionCard(
                 selected = isSelected,
                 onClick = onClick,
                 colors = RadioButtonDefaults.colors(
-                    selectedColor = badgeColor,
-                    unselectedColor = Life360DarkBorder
+                    selectedColor = accentColor,
+                    unselectedColor = Life360LightBorder
                 )
             )
         }
     }
 }
-
